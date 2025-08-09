@@ -1,9 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "dev": { "cache": false, "persistent": true },
-    "lint": {},
-    "test": {},
-    "build": {}
+    "lint": { "cache": true },
+    "type-check": { "cache": true },
+    "test": { "cache": true },
+    "build": { "cache": true }
   }
 }
