@@ -24,7 +24,7 @@ services:
       BACKEND_DATABASE_URL: ${BACKEND_DATABASE_URL}
       BACKEND_DEBUG: "true"
       BACKEND_APP_NAME: "Piano Tutor AI Backend"
-      BACKEND_CORS_ORIGINS: "[\"http://localhost:3000\", \"http://127.0.0.1:3000\"]"
+      BACKEND_CORS_ORIGINS: "[\"http://localhost:3000\", \"http://127.0.0.1:3000\", \"http://localhost:3001\", \"http://127.0.0.1:3001\", \"http://localhost:3100\", \"http://127.0.0.1:3100\"]"
     ports:
       - "8001:8000"
     volumes:
