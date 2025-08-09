@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./services/backend-python
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      BACKEND_DATABASE_URL: ${BACKEND_DATABASE_URL}
+      BACKEND_DEBUG: "true"
+      BACKEND_APP_NAME: "Piano Tutor AI Backend"
+      BACKEND_CORS_ORIGINS: "[\"http://localhost:3000\", \"http://127.0.0.1:3000\"]"
+    ports:
+      - "8001:8000"
+    volumes:
+      - backend_storage:/app/storage
+
+volumes:
+  db_data:
+  backend_storage:

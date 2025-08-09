@@ -1,0 +1,45 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# Node/Next.js
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Lockfiles (keep root, ignore nested)
+apps/**/package-lock.json
+services/**/package-lock.json
+packages/**/package-lock.json
+apps/**/yarn.lock
+services/**/yarn.lock
+packages/**/yarn.lock
+apps/**/pnpm-lock.yaml
+services/**/pnpm-lock.yaml
+packages/**/pnpm-lock.yaml
+
+# Env files
+.env
+.env.*
+apps/**/.env.local
+services/**/.env.local
+packages/**/.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.venv*/
+.pytest_cache/
+
+# Backend storage
+services/backend-python/storage/
+
+# Docker
+*.pid

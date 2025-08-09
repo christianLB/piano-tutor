@@ -1,0 +1,38 @@
+{
+  "name": "piano-tutor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "App Musical Interactiva Asistida por IA",
+  "main": "index.js",
+  "packageManager": "pnpm@10.12.1+sha1.4bd977ce548dc9fcd1ca0c62838c55646cea6847",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "prepare": "husky",
+    "test": "turbo run test || echo 'no tests'"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,md,json,css,scss}": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "turbo": "^2.5.5",
+    "typescript": "^5.9.2"
+  }
+}
