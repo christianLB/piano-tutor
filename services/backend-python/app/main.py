@@ -1,15 +1,14 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional, List
-from datetime import datetime
 import os
 import uuid
+from datetime import datetime
+from typing import List, Optional
 
-from sqlmodel import SQLModel, Field, Session, create_engine, select
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 from .core.config import get_settings
-
 
 settings = get_settings()
 app = FastAPI(title=settings.app_name, version="0.1.0")
@@ -73,6 +72,16 @@ async def health():
     return {"status": "ok"}
 
 
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5MB
+ALLOWED_CONTENT_TYPES = {
+    "application/xml",
+    "text/xml",
+    "application/vnd.recordare.musicxml",
+    "audio/midi",
+    "audio/x-midi",
+}
+
+
 @app.post("/analyse", response_model=AnalyseResponse)
 async def analyse(file: UploadFile = File(...), session: Session = Depends(get_session)):
     """
@@ -84,9 +93,16 @@ async def analyse(file: UploadFile = File(...), session: Session = Depends(get_s
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"music21 not available: {e}")
 
+    # Basic validation
+    if file.content_type and file.content_type not in ALLOWED_CONTENT_TYPES:
+        msg = f"Unsupported content type: {file.content_type}"
+        raise HTTPException(status_code=400, detail=msg)
+
     contents = await file.read()
     if not contents:
         raise HTTPException(status_code=400, detail="Empty file")
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
 
     # Persist file
     ext = os.path.splitext(file.filename or "")[1] or ".xml"
@@ -101,7 +117,11 @@ async def analyse(file: UploadFile = File(...), session: Session = Depends(get_s
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse file: {e}")
 
-    measures = len(score.parts[0].getElementsByClass('Measure')) if getattr(score, 'parts', None) else 0
+    measures = (
+        len(score.parts[0].getElementsByClass("Measure"))
+        if getattr(score, "parts", None)
+        else 0
+    )
     notes_count = len(score.recurse().getElementsByClass(note.Note))
 
     try:
