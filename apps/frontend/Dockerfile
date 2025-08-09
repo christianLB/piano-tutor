@@ -23,5 +23,6 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN pnpm --filter frontend build
 
 # Runtime
+WORKDIR /app/apps/frontend
 EXPOSE 3000
-CMD ["pnpm","--filter","frontend","start","--","-p","3000"]
+CMD ["pnpm","start","--","--port","3000","--hostname","0.0.0.0"]
