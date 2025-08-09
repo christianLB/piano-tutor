@@ -1,0 +1,50 @@
+name: Frontend E2E Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: corepack enable
+
+      - name: Install dependencies
+        working-directory: apps/frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        working-directory: apps/frontend
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build frontend
+        working-directory: apps/frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8001
+        run: pnpm build
+
+      - name: Start frontend
+        working-directory: apps/frontend
+        env:
+          PORT: 3000
+        run: |
+          (pnpm start -- -p 3000 &)
+          for i in {1..40}; do
+            if curl -sf http://localhost:3000 > /dev/null; then echo 'Frontend is up'; break; fi
+            sleep 1
+          done
+
+      - name: Run Playwright tests
+        working-directory: apps/frontend
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+        run: pnpm test:e2e

@@ -10,6 +10,7 @@ export default function Home() {
           <nav className="hidden sm:flex items-center gap-6 text-sm">
             <Link href="/score" className="hover:underline">Score</Link>
             <Link href="/analyse" className="hover:underline">Analyse</Link>
+            <Link href="/scores" className="hover:underline">Scores</Link>
             <a href="https://github.com/christianLB/piano-tutor" target="_blank" rel="noreferrer" className="hover:underline">GitHub</a>
           </nav>
         </div>

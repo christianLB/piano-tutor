@@ -66,6 +66,12 @@ export default function ScoreDetailPage() {
             </div>
             <div className="mt-3">
               <a href={fileUrl} className="underline" target="_blank" rel="noreferrer">Download / Open File</a>
+              {fileUrl && (
+                <>
+                  <span className="mx-2 text-neutral-400">•</span>
+                  <a href={`/score?file=${encodeURIComponent(fileUrl)}`} className="underline">Open in Viewer</a>
+                </>
+              )}
             </div>
           </div>
 
