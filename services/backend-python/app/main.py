@@ -77,6 +77,8 @@ ALLOWED_CONTENT_TYPES = {
     "application/xml",
     "text/xml",
     "application/vnd.recordare.musicxml",
+    "application/vnd.recordare.musicxml+xml",
+    "application/octet-stream",  # common for multipart uploads
     "audio/midi",
     "audio/x-midi",
 }
@@ -94,7 +96,10 @@ async def analyse(file: UploadFile = File(...), session: Session = Depends(get_s
         raise HTTPException(status_code=500, detail=f"music21 not available: {e}")
 
     # Basic validation
-    if file.content_type and file.content_type not in ALLOWED_CONTENT_TYPES:
+    allowed_exts = {".xml", ".musicxml", ".mid", ".midi"}
+    fn = (file.filename or "").lower()
+    ext_guess = os.path.splitext(fn)[1]
+    if file.content_type and file.content_type not in ALLOWED_CONTENT_TYPES and ext_guess not in allowed_exts:
         msg = f"Unsupported content type: {file.content_type}"
         raise HTTPException(status_code=400, detail=msg)
 
