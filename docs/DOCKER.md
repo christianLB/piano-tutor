@@ -7,17 +7,27 @@
 - `backend` (FastAPI + Uvicorn)
   - Expone `8001` en host.
   - Depende de `db`.
+- `frontend` (Next.js)
+  - Expone `3001` en host (puedes cambiarlo con `FRONTEND_PORT`).
+  - Depende de `backend`.
+  - Usa `NEXT_PUBLIC_API_URL=http://localhost:8001` por defecto.
 
 ## Comandos básicos
 ```bash
-# Levantar
+# Levantar backend + DB
 docker compose up -d db backend
+
+# Levantar full-stack (DB + backend + frontend)
+docker compose up -d db backend frontend
 
 # Reconstruir backend si cambian deps o Dockerfile
 docker compose build backend && docker compose up -d backend
 
 # Logs
 docker compose logs -f backend
+
+# Acceder al frontend
+open http://localhost:${FRONTEND_PORT:-3001}
 
 # Apagar
 docker compose down
