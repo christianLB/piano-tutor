@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlmodel import Field, Session, SQLModel, create_engine, select
@@ -183,3 +184,47 @@ class ScoreOut(BaseModel):
 @app.get("/scores", response_model=List[ScoreOut])
 def list_scores(session: Session = Depends(get_session)):
     return session.exec(select(Score).order_by(Score.created_at.desc())).all()
+
+
+class ScoreDetailOut(BaseModel):
+    score: ScoreOut
+    analysis: Optional[AnalyseResponse] = None
+
+
+@app.get("/scores/{score_id}", response_model=ScoreDetailOut)
+def get_score(score_id: int, session: Session = Depends(get_session)):
+    score = session.get(Score, score_id)
+    if not score:
+        raise HTTPException(status_code=404, detail="Score not found")
+    # latest analysis for this score
+    result = session.exec(
+        select(Analysis).where(Analysis.score_id == score_id).order_by(Analysis.created_at.desc())
+    ).first()
+    analysis = None
+    if result:
+        analysis = AnalyseResponse(
+            key=result.key,
+            time_signature=result.time_signature,
+            measures=result.measures,
+            notes=result.notes,
+            score_id=result.score_id,
+            analysis_id=result.id,
+        )
+    return ScoreDetailOut(score=score, analysis=analysis)
+
+
+@app.get("/files/{filename}")
+def get_file(filename: str):
+    """Serve stored MusicXML/MIDI files for OSMD or downloads."""
+    safe_name = os.path.basename(filename)
+    path = os.path.join("storage", "scores", safe_name)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="File not found")
+    # naive content type based on extension
+    ext = os.path.splitext(safe_name)[1].lower()
+    media = "application/octet-stream"
+    if ext in {".xml", ".musicxml"}:
+        media = "application/vnd.recordare.musicxml+xml"
+    elif ext in {".mid", ".midi"}:
+        media = "audio/midi"
+    return FileResponse(path, media_type=media, filename=safe_name)
